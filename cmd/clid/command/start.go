@@ -9,6 +9,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
+	"github.com/BinacsLee/server/types"
+
 	cos_pb "github.com/BinacsLee/server/api/cos"
 	crypto_pb "github.com/BinacsLee/server/api/crypto"
 	pastebin_pb "github.com/BinacsLee/server/api/pastebin"
@@ -63,6 +65,8 @@ func dailAndServe() error {
 	conn, err := grpc.Dial(domain+port,
 		grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(util.GetCertPool(), domain)),
 		grpc.WithPerRPCCredentials(util.GetToken(instance)),
+		grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(types.GrpcMsgSize)),
+		grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(types.GrpcMsgSize)),
 	)
 	if err != nil {
 		return err
@@ -81,7 +85,10 @@ func dailAndServe() error {
 	}
 
 	// Serve
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.MaxRecvMsgSize(types.GrpcMsgSize),
+		grpc.MaxSendMsgSize(types.GrpcMsgSize),
+	)
 	node := service.InitService(conn)
 
 	cos_pb.RegisterCosServer(s, node.Cos.(cos_pb.CosServer))

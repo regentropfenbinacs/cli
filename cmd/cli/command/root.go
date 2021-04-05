@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
+	"github.com/BinacsLee/server/types"
+
 	"github.com/BinacsLee/cli/service"
 	"github.com/BinacsLee/cli/util"
 )
@@ -29,6 +31,8 @@ var (
 				grpc.WithInsecure(),
 				grpc.WithDialer(unixConnect),
 				grpc.FailOnNonTempDialError(true),
+				grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(types.GrpcMsgSize)),
+				grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(types.GrpcMsgSize)),
 			)
 			if err != nil {
 				return err
